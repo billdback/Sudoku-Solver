@@ -11,8 +11,8 @@ trait Solver {
 
   /**
    * Solves the puzzle.
-   * @param puzzle 9x9 array of integers.  For each entry a negative number indicates a blank space.
-   * @return The results as a 9x9 array of integers.
+   * @param puzzle For each entry a negative number indicates a blank space.
+   * @return The results.
    */
-  def solve (puzzle : Array[Array[Int]]) : Array[Array[Int]]
+  def solve (puzzle : Puzzle) : Puzzle
 }

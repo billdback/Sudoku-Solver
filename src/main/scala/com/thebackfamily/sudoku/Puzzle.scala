@@ -31,9 +31,9 @@ class Puzzle {
    * @param rcnt The row count of the item to return. 0 to 8.
    * @param ccnt The column count of the item to return. 0 to 8.
    */
-  def cell(rcnt : Int)(ccnt : Int) = {
-    require(rcnt >= 0 && rcnt < 9, "row index not in range 0-8")
-    require(ccnt >= 0 && ccnt < 9, "column index not in range 0-8")
+  def cell(rcnt : Int)(ccnt : Int) : Int = {
+    require(rcnt >= 0 && rcnt < Puzzle.NumberRows, "row index not in range 0-8")
+    require(ccnt >= 0 && ccnt < Puzzle.RowLength,  "column index not in range 0-8")
 
     puzzle(rcnt)(ccnt)
   }
@@ -44,8 +44,8 @@ class Puzzle {
    * @param ccnt The column count of the item to return. 0 to 8.
    */
   def setCell(rcnt : Int)(ccnt : Int)(value : Int) = {
-    require(rcnt >= 0 && rcnt < 9, "row index not in range 0-8")
-    require(ccnt >= 0 && ccnt < 9, "column index not in range 0-8")
+    require(rcnt >= 0 && rcnt < Puzzle.NumberRows, "row index not in range 0-8")
+    require(ccnt >= 0 && ccnt < Puzzle.RowLength,  "column index not in range 0-8")
 
     puzzle(rcnt)(ccnt) = value
   }
@@ -53,11 +53,10 @@ class Puzzle {
   /**
    * Returns the value at the row and column.  Rows and colums are numbered from 0-8.
    * @param rcnt The row count of the item to return. 0 to 8.
-   * @param ccnt The column count of the item to return. 0 to 8.
+   * @param values The values to populate the row with.
    */
   def setRow(rcnt : Int)(values : (Int, Int, Int, Int, Int, Int, Int, Int, Int)) = {
-    require(rcnt >= 0 && rcnt < 9, "row index not in range 0-8")
-
+    require(rcnt >= 0 && rcnt < Puzzle.NumberRows, "row index not in range 0-8")
 
     setCell(rcnt)(0)(values._1)
     setCell(rcnt)(1)(values._2)
@@ -71,16 +70,42 @@ class Puzzle {
   }
 
   /**
+   * Sets the value of a row from a list.
+   * @param rcnt The row to set.
+   * @param list The list to populate the row from.  Must contain a row's worth of values.
+   */
+  def setRowFromList (rcnt : Int)(list : List[Int]) = {
+    require(rcnt >= 0 && rcnt < Puzzle.NumberRows, "row index not in range 0-8")
+    require (list.length == Puzzle.RowLength, "list must be " + Puzzle.NumberRows + " items.")
+
+    setRowFromArray(rcnt)(list.toArray)
+  }
+
+  /**
+   * Sets the value of a row from a list.
+   * @param rcnt The row to set.
+   * @param list The list to populate the row from.  Must contain a row's worth of values.
+   */
+  def setRowFromArray (rcnt : Int)(arr : Array[Int]) = {
+    require(rcnt >= 0 && rcnt < Puzzle.NumberRows, "row index not in range 0-8")
+    require (arr.length == Puzzle.RowLength, "array must be " + Puzzle.NumberRows + " items.")
+
+    for (ccnt <- 0 until Puzzle.RowLength) {
+      setCell(rcnt)(ccnt)(arr(ccnt))
+    }
+  }
+
+  /**
    * Returns true if the given cell is empty.
    * @param rcnt The row count of the item to check. 0 to 8.
    * @param ccnt The column count of the item to check. 0 to 8.
    * @return true if the given cell is empty.
    */
   def isEmpty(rcnt : Int)(ccnt : Int) : Boolean = {
-    require(rcnt >= 0 && rcnt < 9, "row index not in range 0-8")
-    require(ccnt >= 0 && ccnt < 9, "column index not in range 0-8")
+    require(rcnt >= 0 && rcnt < Puzzle.NumberRows, "row index not in range 0-8")
+    require(ccnt >= 0 && ccnt < Puzzle.RowLength,  "column index not in range 0-8")
 
-    puzzle(rcnt)(ccnt) < 1 || puzzle(rcnt)(ccnt) > 9
+    Puzzle.emptyVal(puzzle(rcnt)(ccnt))
   }
 
   /**
@@ -88,8 +113,8 @@ class Puzzle {
    * @return The given row (0-8).
    */
   def row(rcnt : Int) : Array[Int] = {
-    require(rcnt >= 0 && rcnt < 9, "row index not in range 0-8")
-    puzzle(rcnt).clone
+    require(rcnt >= 0 && rcnt < Puzzle.NumberRows, "row index not in range 0-8")
+    puzzle(rcnt)
   }
 
   /**
@@ -97,10 +122,10 @@ class Puzzle {
    * @return The given column (0-8).
    */
   def column(ccnt : Int) : Array[Int] = {
-    require(ccnt >= 0 && ccnt < 9, "column index not in range 0-8")
-    val col : Array[Int] = Array.ofDim(9)
-    for (cnt <- 0 until 9) {
-      col(cnt) = puzzle(ccnt)(cnt)
+    require(ccnt >= 0 && ccnt < Puzzle.RowLength, "column index not in range 0-8")
+    val col : Array[Int] = Array.ofDim(Puzzle.RowLength)
+    for (cnt <- 0 until Puzzle.RowLength) {
+      col(cnt) = puzzle(cnt)(ccnt)
     }
     col
   }
@@ -111,7 +136,7 @@ class Puzzle {
    * @return The mini-grid.
    */
   def miniGrid(mgcnt : Int) : Array[Int] = {
-    require(mgcnt >= 0 && mgcnt < 9, "mini-grid index not in range 0-8")
+    require(mgcnt >= 0 && mgcnt < Puzzle.RowLength, "mini-grid index not in range 0-8")
 
     var rcnt : Int = 0
     var ccnt : Int = 0
@@ -130,7 +155,7 @@ class Puzzle {
     ccnt = (mgcnt % 3) * 3
 
     // rcnt and ccnt are pointing to the upper left entry of the mini grid.
-    val res : Array[Int] = Array.ofDim(9)
+    val res : Array[Int] = Array.ofDim(Puzzle.RowLength)
     res(0) = puzzle(rcnt)(ccnt)
     res(1) = puzzle(rcnt)(ccnt + 1)
     res(2) = puzzle(rcnt)(ccnt + 2)
@@ -144,6 +169,52 @@ class Puzzle {
     res
   }
 
+  /**
+   * Returns the missing values for a given row.
+   * @param rcnt The row to get the missing values for.
+   * @param
+   */
+  def missingValuesInRow (rcnt : Int) : List[Int] = {
+    val hasVals = row(rcnt).toList.filterNot(aval => Puzzle.emptyVal(aval))
+    Puzzle.ValidValues -- hasVals
+  }
+
+  /**
+   * Returns a list of all missing values in the puzzle by row.
+   * @return A list of all missing values in the puzzle by row.
+   */
+  def missingValues : Array[List[Int]] = {
+    val missingVals : Array[List[Int]] = Array.ofDim(Puzzle.NumberRows)
+    for (rcnt <- 0 until Puzzle.NumberRows) {
+      missingVals(rcnt) = missingValuesInRow(rcnt)
+    }
+    missingVals
+  }
+
+  /**
+   * Formats the puzzle as a friendly string for printing.
+   * @return The puzzle as a friendly string for printing.
+   */
+  override def toString () : String = {
+    var res : String = ""
+    puzzle.foreach { row =>
+      res += row.mkString(", ") + "\n"
+    }
+    res
+  }
+
+  /**
+   * Returns true if the other puzzle has the same values as this one.
+   * @param other The other puzzle to compare for equality.
+   * @return True if the other puzzle has the same values as this one.
+   */
+  override def equals (other : Any) = {
+    var areEqual = other.isInstanceOf[Puzzle]
+    for (rcnt <- 0 until 9; if areEqual) {
+      areEqual = areEqual && puzzle(rcnt) == other.asInstanceOf[Puzzle].row(rcnt)
+    }
+    areEqual
+  }
 }
 
 /**
@@ -151,6 +222,19 @@ class Puzzle {
  * @author Bill Back
  */
 object Puzzle {
+
+  val RowLength   = 9  // Number of items in a row.
+  val NumberRows  = 9  // Number of rows in a puzzle.
+  val EmptyValue  = 0  // A value that represents an empty puzzle location.
+  val ValidValues = List(1, 2, 3, 4, 5, 6, 7, 8, 9)
+
+  /**
+   * Returns true if the value is considered an empty val.
+   */
+  def emptyVal(aval : Int) : Boolean = {
+    aval < 1 || aval > 9
+  }
+
   /**
    * Converts from a tuple to a puzzle.  Provides a convenience method to make assignment
    * pretty.

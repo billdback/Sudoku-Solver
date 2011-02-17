@@ -51,9 +51,20 @@ class VerifySpec extends SpecificationWithJUnit {
     }
 
     "not verify if there are duplicates in a column" in {
-      puzzle.setCell(1)(1)(1)
+      puzzle = (
+        (3, 2, 1, 4, 5, 6, 7, 8, 9),
+        (5, 4, 6, 7, 8, 9, 1, 2, 3),
+        (7, 8, 9, 1, 2, 3, 4, 5, 6),
+        (3, 2, 4, 5, 6, 7, 8, 9, 1),
+        (5, 6, 7, 8, 9, 1, 2, 4, 3),
+        (8, 9, 1, 2, 3, 4, 5, 7, 6),
+        (3, 4, 5, 6, 7, 8, 1, 9, 2),
+        (6, 7, 8, 9, 2, 1, 3, 4, 5),
+        (9, 1, 2, 3, 4, 5, 6, 7, 8)
+      )
       Verify(puzzle) must beFalse
     }
+
 
     "not verify if there are duplicates in a mini-grid" in {
       // Note that rows and columns are still unique.

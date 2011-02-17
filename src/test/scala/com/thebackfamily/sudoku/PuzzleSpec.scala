@@ -42,6 +42,43 @@ class PuzzleSpec extends SpecificationWithJUnit {
       )
     }
 
+    "be properly initialized on creation" in {
+      val newPuzzle = new Puzzle
+      for (rcnt <- 0 until Puzzle.NumberRows) {
+        for (ccnt <- 0 until Puzzle.RowLength) {
+          newPuzzle.cell(rcnt)(ccnt) must_== 0
+        }
+      }
+    }
+
+    "return missing values from a row" in {
+      puzzle.setCell(0)(0)(Puzzle.EmptyValue)
+      puzzle.setCell(0)(4)(Puzzle.EmptyValue)
+      val missingVals = puzzle.missingValuesInRow(0)
+      missingVals must_== List(1, 5)
+    }
+
+    "return all the missing values in a puzzle" in {
+      puzzle.setCell(0)(0)(Puzzle.EmptyValue)
+      puzzle.setCell(0)(4)(Puzzle.EmptyValue)
+
+      puzzle.setCell(1)(2)(Puzzle.EmptyValue)
+
+      puzzle.setCell(5)(5)(Puzzle.EmptyValue)
+      puzzle.setCell(5)(8)(Puzzle.EmptyValue)
+
+      val missingVals = puzzle.missingValues
+      missingVals(0) must_== List(1, 5)
+      missingVals(1) must_== List(4)
+      missingVals(2) must_== List()
+      missingVals(3) must_== List()
+      missingVals(4) must_== List()
+      missingVals(5) must_== List(2, 5)
+      missingVals(6) must_== List()
+      missingVals(7) must_== List()
+      missingVals(8) must_== List()
+    }
+
     "return correct cell values" in {
       // note that this also tests the implicit conversion from tuple to puzzle.
       for (rcnt <- 0 until 9) {
@@ -71,8 +108,36 @@ class PuzzleSpec extends SpecificationWithJUnit {
       puzzle.setCell(1)(10)(1) must throwAn[IllegalArgumentException]
     }
 
-    "properly set rows" in {
+    "properly set rows from a list of values" in {
       puzzle.setRow(2)(9, 8, 7, 6, 5, 4, 3, 2, 1)
+      puzzle.cell(2)(0) must_== 9
+      puzzle.cell(2)(1) must_== 8
+      puzzle.cell(2)(2) must_== 7
+      puzzle.cell(2)(3) must_== 6
+      puzzle.cell(2)(4) must_== 5
+      puzzle.cell(2)(5) must_== 4
+      puzzle.cell(2)(6) must_== 3
+      puzzle.cell(2)(7) must_== 2
+      puzzle.cell(2)(8) must_== 1
+    }
+
+    "properly set rows from an array" in {
+      val row = Array[Int](9, 8, 7, 6, 5, 4, 3, 2, 1)
+      puzzle.setRowFromArray(2)(row)
+      puzzle.cell(2)(0) must_== 9
+      puzzle.cell(2)(1) must_== 8
+      puzzle.cell(2)(2) must_== 7
+      puzzle.cell(2)(3) must_== 6
+      puzzle.cell(2)(4) must_== 5
+      puzzle.cell(2)(5) must_== 4
+      puzzle.cell(2)(6) must_== 3
+      puzzle.cell(2)(7) must_== 2
+      puzzle.cell(2)(8) must_== 1
+    }
+
+    "properly set rows from a list" in {
+      val row = List[Int](9, 8, 7, 6, 5, 4, 3, 2, 1)
+      puzzle.setRowFromList(2)(row)
       puzzle.cell(2)(0) must_== 9
       puzzle.cell(2)(1) must_== 8
       puzzle.cell(2)(2) must_== 7
@@ -151,7 +216,7 @@ class PuzzleSpec extends SpecificationWithJUnit {
 
     "propoerly return mini-grids" in {
       val mg = puzzle.miniGrid(3)
-println(mg.mkString(","))
+
       // second row of mini-grids, first column.
       mg(0) must_== 4
       mg(1) must_== 5

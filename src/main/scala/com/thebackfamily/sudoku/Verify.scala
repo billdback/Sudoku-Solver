@@ -23,14 +23,13 @@ package com.thebackfamily.sudoku
  */
 object Verify {
 
-  // TODO look at how to reuse the basic looping algorithm to clean this up.
-  // TODO look at converting to actors to check the rows and grids independently.
 
   /**
    * Returns true if the puzzle is a valid solution, false otherwise.
    * @return True if the puzzle is a valid solution, false otherwise.
    */
   def apply (puzzle : Puzzle) : Boolean = {
+    // TODO look at converting to actors to check the rows and grids independently.
     checkRows(puzzle) && checkColumns(puzzle) && checkMiniGrids (puzzle)
   }
 

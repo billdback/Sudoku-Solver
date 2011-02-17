@@ -32,20 +32,34 @@ object SudokuSolver {
   def main(args : Array[String]) {
 
     // get the data from the args.
-    var puzzle : Array[Array[Int]] = Array.fill(9, 9)(-1)
+    var puzzle : Puzzle = (
+          ( 1,  2, -3, -4, -5, -6, -7, -8, -9),
+          (-2, -3,  4,  5, -6, -7, -8, -9, -1),
+          (-3, -4, -5, -6,  7,  8, -9, -1, -2),
+          (-4, -5, -6, -7, -8, -9, -1,  2,  3),
+          ( 5,  6, -7, -8, -9, -1, -2, -3, -4),
+          (-6, -7,  8,  9, -1, -2, -3, -4, -5),
+          (-7, -8, -9, -1,  2,  3, -4, -5, -6),
+          (-8, -9, -1, -2, -3, -4,  5,  6, -7),
+          (-9, -1, -2, -3, -4, -5, -6, -7 ,-8)
+      )
 
     // track start time.
     val start = new Date().getTime
-    val solver = new BruteForceSolver
+    //val solver = new BruteForceSolver
+    val solver = new RandomSolver
 
     println( "Solving puzzle using " + solver.name + " solver.")
     val solution = solver.solve(puzzle)
 
+    val itWasSolved = Verify(solution)
+
     // show time to complete.
-    println ("solved in " + (new Date().getTime - start) + " milliseconds")
+    println ((if (itWasSolved) "solved" else "not solved") + " in " + (new Date().getTime - start) + " milliseconds")
 
     // show the results.
-    for (row <- solution) {
+    for (rcnt <- (0 until 9)) {
+      val row = solution.row(rcnt)
       println(row.mkString(", "))
     }
   }
