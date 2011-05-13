@@ -267,4 +267,41 @@ object Puzzle {
     puzzle
 
   }
+
+  /**
+   * String conversion uses commas and newlines to separate values.  All other characters other than numbers and commas
+   * are ignored.  Numbers are accepted one at a time, so the first 9 make up the first row, next 9 second, etc.
+   * If there are fewer than the expected 81 lines, then the remainder are left as empty values.
+   * Samples of valid lines: <br />
+   * 1,2,3,4,5,6,7,8,9 - all values provided for the line<br />
+   * (1, 2, , , 5, 6, 7, 8, 9) - emptly values for 3, 4<br />
+   * 1, 23, 4, 5, 6, 7, 8 - 23 will be interpreted as empty since it isn't a valid value.  This line also only
+   * has 7 entries, so the next two would be considered part of the same line.
+   * @param vals A string with the values.
+   * @return A new puzzle populated with the values in the string.
+   */
+  implicit def stringToPuzzle (vals : String) : Puzzle = {
+    var currentNumberString = ""
+    val newPuzzle = new Puzzle
+
+    var (rcnt, ccnt) = (0, 0)
+    vals split Array(',', '\n') foreach { token =>
+      var value : Int = try {
+        token.trim.toInt
+      } catch  {
+      case _ : java.lang.NumberFormatException => EmptyValue
+      }
+
+      if (rcnt <= 8) { // don't exceed number of rows if data have more values.
+        newPuzzle.setCell(rcnt)(ccnt)(value)
+        ccnt += 1
+        if (ccnt > 8) {
+          ccnt = 0
+          rcnt += 1
+        }
+      }
+    }
+
+    newPuzzle
+  }
 }

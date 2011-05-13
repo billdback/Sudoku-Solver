@@ -18,6 +18,7 @@
 package com.thebackfamily.sudoku
 
 import java.util.Date
+import scala.io.Source
 
 /**
  * The SudokuSolver is a tool that solves sudoku puzzles using a possible variety of approaches.
@@ -27,42 +28,40 @@ import java.util.Date
  * 3.  From the command line prompt, one line at a time of nine entries.
  * @author Bill Back
  */
-object SudokuSolver {
+object SudokuSolver extends App {
 
-  def main(args : Array[String]) {
-
-    // get the data from the args.
-    var puzzle : Puzzle = (
-          ( 1,  2, -3, -4, -5, -6, -7, -8, -9),
-          (-2, -3,  4,  5, -6, -7, -8, -9, -1),
-          (-3, -4, -5, -6,  7,  8, -9, -1, -2),
-          (-4, -5, -6, -7, -8, -9, -1,  2,  3),
-          ( 5,  6, -7, -8, -9, -1, -2, -3, -4),
-          (-6, -7,  8,  9, -1, -2, -3, -4, -5),
-          (-7, -8, -9, -1,  2,  3, -4, -5, -6),
-          (-8, -9, -1, -2, -3, -4,  5,  6, -7),
-          (-9, -1, -2, -3, -4, -5, -6, -7 ,-8)
-      )
-
-    // track start time.
-    val start = new Date().getTime
-    //val solver = new BruteForceSolver
-    val solver = new RandomSolver
-
-    println( "Solving puzzle using " + solver.name + " solver.")
-    val solution = solver.solve(puzzle)
-
-    val itWasSolved = Verify(solution)
-
-    // show time to complete.
-    println ((if (itWasSolved) "solved" else "not solved") + " in " + (new Date().getTime - start) + " milliseconds")
-
-    // show the results.
-    for (rcnt <- (0 until 9)) {
-      val row = solution.row(rcnt)
-      println(row.mkString(", "))
+  // get the data from the args.
+  var puzzleInput = new StringBuilder
+  if (args.length > 0) { // should be name of a file.
+    val src = Source.fromFile(args(0))
+    puzzleInput.append (src.mkString)
+  }
+  else { // prompt for the lines on the command line.
+    println ("Enter each line of the puzzle with ',' separating the values.  Empty values can be blank spaces or zeros.")
+    (1 to 0) foreach { cnt =>
+      println ("Line " + cnt + ":  ")
+      val src = Source.stdin.getLines
+      puzzleInput.append (src.mkString)
     }
   }
+  println ("Puzzle to solve:\n" + puzzleInput.toString)
 
+  val puzzle = puzzleInput.toString
+  // track start time.
+  val start = new Date().getTime
+  val solver = new BruteForceSolver
+  //val solver = new RandomSolver
+  solver.showStatus = true
+
+  println( "Solving puzzle using " + solver.name + " solver.")
+  val solution = solver.solve(puzzle)
+
+  val itWasSolved = Verify(solution)
+
+  // show time to complete.
+  println ((if (itWasSolved) "solved" else "not solved") + " in " + (new Date().getTime - start) + " milliseconds")
+
+  println ("Solution:\n")
+  println(solution.toString)
 
 }

@@ -17,20 +17,59 @@
 */
 package com.thebackfamily.sudoku
 
+import scala.actors.TIMEOUT
+import scala.actors.Actor
+import scala.actors.Actor._
+
 /**
  * Verifies the puzzle to tell if it's accurate or not.
  * @author Bill Back
  */
 object Verify {
 
+  val rowsChecker = actor {
+    var cnt = 0
+    Actor.loop {
+      reactWithin(100) {
+        case p : Puzzle => reply(checkRows(p))
+        case TIMEOUT => println("killing row actor"); exit()
+      }
+    }
+  }
+
+  val columnsChecker = actor {
+    Actor.loop {
+      reactWithin(100) {
+        case p : Puzzle => reply(checkColumns(p))
+        case TIMEOUT => println("killing column actor"); exit()
+      }
+    }
+  }
+
+  val miniGridsChecker = actor {
+    Actor.loop {
+      reactWithin(100) {
+        case p : Puzzle => reply(checkMiniGrids(p))
+        case TIMEOUT => println("killing minigrid actor"); exit()
+      }
+    }
+  }
 
   /**
    * Returns true if the puzzle is a valid solution, false otherwise.
    * @return True if the puzzle is a valid solution, false otherwise.
    */
   def apply (puzzle : Puzzle) : Boolean = {
-    // TODO look at converting to actors to check the rows and grids independently.
-    checkRows(puzzle) && checkColumns(puzzle) && checkMiniGrids (puzzle)
+    val rowsValid      = rowsChecker      !! puzzle
+    val columnsValid   = columnsChecker   !! puzzle
+    val miniGridsValid = miniGridsChecker !! puzzle
+
+    val rowsResponse = rowsValid()
+    val columnsResponse = columnsValid()
+    val miniGridsResponse = miniGridsValid()
+
+    val valid = rowsResponse.asInstanceOf[Boolean] && columnsResponse.asInstanceOf[Boolean] && miniGridsResponse.asInstanceOf[Boolean]
+    valid
   }
 
   /**
@@ -40,7 +79,7 @@ object Verify {
    */
   private def checkRows (puzzle : Puzzle) : Boolean = {
     var valid = true
-    for (cnt <- 0 until 9) {
+    for (cnt <- 0 until 9; if (valid)) {
       valid = valid && uniqueSet (puzzle.row(cnt))
     }
     valid
@@ -55,7 +94,7 @@ object Verify {
    */
   private def checkColumns (puzzle : Puzzle) : Boolean = {
     var valid = true
-    for (cnt <- 0 until 9) {
+    for (cnt <- 0 until 9; if(valid)) {
       valid = valid && uniqueSet (puzzle.column(cnt))
     }
     valid
@@ -69,7 +108,7 @@ object Verify {
    */
   private def checkMiniGrids (puzzle : Puzzle) : Boolean = {
     var valid = true
-    for (cnt <- 0 until 9) {
+    for (cnt <- 0 until 9; if(valid)) {
       valid = valid && uniqueSet (puzzle.miniGrid(cnt))
     }
     valid

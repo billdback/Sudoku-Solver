@@ -18,6 +18,7 @@
 package com.thebackfamily.sudoku
 
 import scala.collection.mutable.Map
+import java.util.Date
 
 /**
  * Uses a brute force method to solve the puzzle.
@@ -56,11 +57,19 @@ class BruteForceSolver extends Solver {
     for (rcnt <- 0 until missingValues.length) {
 
       val missingVals : List[Int] = missingValues(rcnt)
+
       val currentRow : Array[Int] = puzzle.row(rcnt)
       var combinationsForRow = List[List[Int]]()
       // If there are not missing values, then there is only one combination, the original values.
       if (missingVals == List()) {
         combinationsForRow = combinationsForRow :+ currentRow.toList
+      }
+      else if (missingVals.length == 1) {
+        // split the list at the empty value.
+        val parts = currentRow.toList span (!Puzzle.emptyVal(_))
+        val combination = parts._1 ::: missingVals ::: parts._2.tail
+        combinationsForRow = combinationsForRow :+ combination
+
       }
       else {
         // Move the first index to the last location, swapping with the next.
@@ -68,7 +77,7 @@ class BruteForceSolver extends Solver {
 
         var currentCombination = missingVals
         missingVals.foreach { missingValue =>
-
+          // TODO - FIX THIS BECAUSE IT DOESN"T HANDLE THE CASE OF ONE ITEM IN THE ROW.
           for (swapcnt <- 0 until (currentCombination.length - 1)) {
 
             // Add the values at the front.
@@ -115,7 +124,19 @@ class BruteForceSolver extends Solver {
   private def findSolution (combinations : Map[Int, List[List[Int]]]) : Puzzle = {
 
     val solution = new Puzzle
-    // This is screaming out for recursion, but the freakin' stack overflows don't really help.
+
+    var maxSize : Long = 1
+    var startTime = new Date().getTime // start time used to calculate elapsed and remaining.
+    if (showStatus) {
+      for (cnt <- 0 until 9) {
+        maxSize = maxSize * combinations(cnt).length
+      }
+
+      // Show the maximum number of combination to check.
+      println (maxSize + " possible combinations to check.")
+    }
+
+    var tries = 0
 
     // Seriously brute force - using knowledge that there are nine rows.
     var solved = false
@@ -136,6 +157,15 @@ class BruteForceSolver extends Solver {
                   for (comboCnt7 <- 0 until combinations(7).length; if !solved) {
                     solution.setRowFromList(7)(combinations(7)(comboCnt7))
                     for (comboCnt8 <- 0 until combinations(8).length; if !solved) {
+                      if (showStatus) {
+                        // keep track of the number of tries and the time elapsed to calculate the remaining time.
+                        tries += 1
+                        if (tries % 10000 == 0) {
+                          // determine elapsed time.  Remaining time is number of combos times average per combo checked.
+                          val secsPerTry : Double = (new Date().getTime - startTime) / 1000.0 / tries
+                          printf ("%d max combinations and less than %6.2f secs remaining.\n", (maxSize - tries),((maxSize - tries) * secsPerTry))
+                        }
+                      }
                       solution.setRowFromList(8)(combinations(8)(comboCnt8))
                       solved = Verify(solution)
                     }

@@ -234,6 +234,29 @@ class PuzzleSpec extends SpecificationWithJUnit {
       puzzle.miniGrid(9) must throwAn[IllegalArgumentException]
     }
 
+    "convert from strings to puzzles" in {
+      val stringPuzzle =
+      """1, 2, 3, 4, 5, 6, 7, 8, 9
+         0, 2, 3, 4, 5, 6, 7, 8, 9
+         1,  , 3, 4, 5, 6, 7, 8, 9
+         1,22, 3, 4, 5, 6, 7, 8,
+         1, 2, 3, 4, 5, 6, 7, 8, 0
+         1, 2, 3, 4, 5, 6, a, 8, 9
+         1, 2, 3, 4, 5, 6, 7, 8, 9
+         1, 2, 3, 4, 5, 6, 7, 8, 9
+         1, 2, 3, 4, 5, 6, 7, 8"""
+
+      val puzzle : Puzzle = stringPuzzle
+      puzzle.cell(0)(0) must_== 1
+      puzzle.cell(5)(5) must_== 6
+      Puzzle.emptyVal(puzzle.cell(1)(0)) mustBe true
+      Puzzle.emptyVal(puzzle.cell(2)(1)) mustBe true
+      Puzzle.emptyVal(puzzle.cell(3)(1)) mustBe true
+      Puzzle.emptyVal(puzzle.cell(3)(8)) mustBe true
+      Puzzle.emptyVal(puzzle.cell(4)(8)) mustBe true
+      Puzzle.emptyVal(puzzle.cell(8)(8)) mustBe true
+    }
+
   }
 }
 
