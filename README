@@ -1,0 +1,11 @@
+See COPYING for the license for this software.
+
+The sudoku solver was built as an experimental testbed.  It will solve sudoku puzzles, although the brute force solver can take a VERY long time.  
+
+To run you must have scale 2.9 or later installed.  To build, you must use maven 3 or later (maven 2 may work, but hasn't been tested and doing so may break in the future).  
+
+> scala -cp sudoku-1.0-SNAPSHOT.jar SudokuSolver <filename>
+<filename> is the name of a puzzle file.  See test.pzl for the format. 
+In the future it is hopeful to be able to read from the command line, but this capability doesn't currently work.
+
+If you want to create your own solver that uses other approaches, simply extend the Solver trait.  See the RandomSolver and BruteForceSolver for examples.  You must also change the SudokuSolver class to use your solver.
